@@ -1,0 +1,40 @@
+\documentclass[a4paper]{scrartcl}
+
+\usepackage[ngerman]{babel}
+\usepackage[latin1]{inputenc}   % Umlaute etc. verwenden
+\usepackage[final]{graphicx}    % Grafiken einbinden
+\usepackage{url}
+
+\usepackage[pdftex,
+    pdftitle={Hier soll der Titel hin},
+    pdfauthor={Hier soll der Autor hin}]{hyperref}
+
+
+\setcounter{secnumdepth}{3}
+
+
+\begin{document}
+
+% Der Titel der Seminararbeit, sowie der Autor
+\title{Hier soll der Titel hin}
+\author{Der Autor}
+\date{\today}
+
+\maketitle
+
+
+\tableofcontents
+
+
+
+\section{Einleitung}
+
+
+%***** Bibliographie  *****
+%Die Literatur wird in einem eigenen Dokument im BibTeX Format erfasst: in diesem Fall: referenzen.bib
+\bibliography{referenzen}
+% --- Literaturstellen nummerieren
+\bibliographystyle{plain}
+
+
+\end{document}
