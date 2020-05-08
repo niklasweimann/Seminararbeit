@@ -1,13 +1,13 @@
 \documentclass[a4paper]{scrartcl}
 
 \usepackage[ngerman]{babel}
-\usepackage[latin1]{inputenc}   % Umlaute etc. verwenden
+\usepackage[utf8]{inputenc}   % Umlaute etc. verwenden
 \usepackage[final]{graphicx}    % Grafiken einbinden
 \usepackage{url}
 
 \usepackage[pdftex,
     pdftitle={Hier soll der Titel hin},
-    pdfauthor={Hier soll der Autor hin}]{hyperref}
+    pdfauthor={Niklas Weimann}]{hyperref}
 
 
 \setcounter{secnumdepth}{3}
@@ -17,18 +17,60 @@
 
 % Der Titel der Seminararbeit, sowie der Autor
 \title{Hier soll der Titel hin}
-\author{Der Autor}
+\author{Niklas Weimann}
 \date{\today}
 
 \maketitle
 
 
 \tableofcontents
+\newpage
 
 
 
 \section{Einleitung}
+\textit{Was ist Fuchsia OS?}
+"Pink + Purple == Fuchsia (a new Operating System)"\cite{GoogleLLC.} So beschreibt Google ein neues Betriebssystem, das auf Modularität und 
+Was sind die Ziele?
+\section{Zircon}
+Fuchsia setzt auf den Microkernel Zircon, der vor seiner Umbenennung Magenta hieß. Zircon entstand aus Little Kernel, einem Projekt von Travis Geiselbrecht. Der Kernel wurde so designet, dass er sowohl auf IoT Hardware, als auch auf Desktop Computern eingesetzt werden kann. \cite{DaveAltavilla.30.Juni2019} Die Systemaufrufe, die Zircon zur Verfügung stellt, sind bis auf wenige Ausnahmen alle asynchron und blocken somit nicht den aufrufenden Thread, dies ermöglicht eine effizientere Abarbeitung der Jobs.
+\subsection{Kernel Objects und System Calls}
+Die Kommunikation zwischen Kernel Objekten, und dem Usermode findet über Handles statt. Handles werden von System Calls zurückgegeben, falls diese ein Kernel Objekt erstellt haben (z.b. zx\_event\_create() + zx\_process\_create() + zx\_thread\_create()). Im Usermode ist dieses Handle eine 32 Bit Zahl, wobei die letzten 2 LSB bei validen Handles immer gesetzt sind und die Zahl 0 ein ungültiges Handle repräsentiert. Handle hat nur für den jeweiligen Prozess eine Bedeutung, der es angefordert hat, in einem anderen Prozess kann dieses Handle auf ein anderes Kernel Objekt zeigen oder ungültig sein. Ein Prozess kann mehrere Handles haben, um auf das selbe Kernel Objekt zuzugreifen, wobei sich hierbei dann meist die jeweiligen Zugriffsrechte unterscheiden. Die Zugriffsrechte, die ein Handle auf ein Kernel Objekt hat, werden im Kernel gespeichert. Der Kernel hat für jedes Handle ein C++ Objekt, das erstens eine Referenz auf das Kernel Objekt hat, zweitens eine Liste mit allen Rechten die das Handle hat und drittens eine Referenz auf den Prozess, zu dem es gehört. Diese Zugriffsrechte können einschränken werden, indem mittels zx\_handle\_duplicate() \cite{https://fuchsia.dev/fuchsia-src/reference/syscalls/handle_replace} oder mittels zx\_handle\_replace() \cite{https://fuchsia.dev/fuchsia-src/reference/syscalls/handle_replace} ein neues Handle erstellt wird, dass eine Untermenge der Rechte des Ursprünglichen Handles besitzt.
+Jedes Kernel Objekt kann eine Reihe an Outputs haben, sogenannte Signale. Jedes Signal kann nur eine ein Bit Information repräsentieren, wobei pro Objekt bis zu 32 Signale möglich sind. Diese Signale können mittels System Calls erwartet werden. Diese Signale repräsentieren sozusagen den Zustand, in dem sich das Kernel Objekt befindet.
 
+
+
+Wie funktioniert die Rechte Verteilung?
+Welche Vorteile hat es, dass alle Aufrufe (außer Wait) Async sind?
+Wie funktionieren Syscalls im Gegensatz dazu im Linux (Android) Kernel?
+\subsection{Scheduling}
+Vergleich zwischen Fuchsia (Fair Scheduler) und Linux (Android) Scheduling
+\section{Komponenten v2}
+\subsection{Komponenten Einführung}
+Was ist eine Komponente?
+Was ist das Komponenten Manifest?
+\subsection{Komponenten Manager}
+Was sind die Aufgaben des Komponenten Manager?
+\subsection{Capabilities}
+Was sind Capabilities (Service, Protocol, Directory, Storage)?
+Was ist Capability Routing und wie funktioniert es?
+\subsection{Vergleich zu Komponenten}
+Welche Vorteile bietet es, dass alles eine Komponente ist im Gegensatz zu Linux (Android)?
+\section{Treiber}
+\subsection{Verwaltung und Zugriff}
+Wie werden Treiber geladen?
+Wie wird er Zugriff auf die Geräte ermöglicht?
+\subsection{Vergleich Treiber}
+Wie werden Treiber unter Linux (Android) verwaltet?
+\section{Dateisystem}
+\subsection{Komponentenbasierter Speicher}
+Wie sind Dateisysteme und das Dateimanagement realisiert?
+\subsection{Cloudunterstützung}
+Was ist Ledger?
+\subsection{Vergleich Filesystems}
+Wie unterscheidet sich das Dateisystem von Linux (Andorid)?
+\section{Zusammenfassung}
+Grobe Zusammenfassung über die Unterschiede zu Linux (Android)
 
 %***** Bibliographie  *****
 %Die Literatur wird in einem eigenen Dokument im BibTeX Format erfasst: in diesem Fall: referenzen.bib
