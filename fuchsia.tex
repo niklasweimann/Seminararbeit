@@ -58,12 +58,21 @@ Der Nice-Wert gibt an, wie nett ein Prozess zu den anderen Prozessen ist. Mit an
 
 Cgroups (Control groups) sind ein von Linux bereitgestelltes System, um Prozesse zu Gruppieren und basierend auf diesen Gruppen das Scheduling zu beeinflussen. Cgroups werden genutzt, um die Benutzeroberfläche von Android möglichst performant zu halten. Die Prozesse werden also entsprechend ihrer Aufgabe klassifiziert, somit kann eine Cgroup, die Beispielsweise aus Background Tasks besteht, so beschränkt werden, dass sie Maximal 5\% der CPU-Zeit erhalten, damit kann sichergestellt werden, dass immer ausreichend CPU-Zeit verfügbar ist, um die Benutzeroberfläche performant wirken zu lassen.
 \section{Komponenten v2}
+Komponenten spielen bei Fuchsia eine wichtige Rolle, da nahe zu alle Programme in Fuchsia als Komponente angesehen werden.
 \subsection{Komponenten Einführung}
-Was ist eine Komponente?
-Was ist das Komponenten Manifest?
+"Eine  Komponente ist ein hermetisches zusammensetzbares isoliertes Programm"\cite{FuCHSIADOCS}, so wird der Begriff "Komponente" in der Fuchsia Dokumentation definiert. Komponenten können in jeder beliebigen Sprache implementiert werden, für die es einen Component-Runner gibt. Ein Component-Runner ist dabei für jede Programmiersprache nötig, die für die Implementierung einer Komponente verwendet wurden. Dieser hat Kenntnis darüber, wie eine Komponente ausgeführt werden kann, während der Komponenten-Manager weiß, was ausgeführt werden soll.
+
+Jede Komponente läuft während ihrer Ausführungszeit in einer Sandbox, sie ist also komplett von anderen Komponenten isoliert, dies ermöglicht es, dass jede Komponente einen eigenen Lebenszyklus, Zustand und Funktionen hat, somit ist auch sichergestellt, dass diese Komponente keine ungewollten Auswirkungen auf andere Komponenten haben kann. Stürzt beispielsweise eine Instanz einer  Komponente ab, so kann sie einfach durch eine neue Instanz der selben Komponente ersetzt werden, dies erhöht signifikant die Stabilität des Systems.
+
+Einzelne Komponenten werden durch ein Komponenten Manifest definiert, dieses enthält alle wichtigen Informationen, die der Komponenten-Manager oder der jeweilige Komponenten-Runner brauchen, um die Komponente erfolgreich ausführen zu können. \cite{https://fuchsia.googlesource.com/fuchsia/+/master/sdk/fidl/fuchsia.sys2/decls/component_decl.fidl} 
+Die Eigenschaften im Komponenten Manifest umfassen unter anderem die Programm Eigenschaft,  die Informationen für den Komponenten-Runner bereitstellt, damit dieser die Komponente erfolgreich starten zu können. Außerdem wird im Komponenten Manifest festgelegt, welchen Speicher (mehr dazu in Kapitel \ref{sec:Dateisystem}),  welche Capabilities die Komponente benötigt, anbietet und weiterleitet (mehr dazu in Kapitel \ref{sec:Capabilities}), sowie wie einige weitere Eigenschaften, auf die hier nicht genauer eingegangen werden soll.
+
+\subsection{FIDL}
 \subsection{Komponenten Manager}
+
 Was sind die Aufgaben des Komponenten Manager?
 \subsection{Capabilities}
+\label{sec:Capabilities}
 Was sind Capabilities (Service, Protocol, Directory, Storage)?
 Was ist Capability Routing und wie funktioniert es?
 \subsection{Vergleich zu Komponenten}
@@ -75,6 +84,7 @@ Wie wird er Zugriff auf die Geräte ermöglicht?
 \subsection{Vergleich Treiber}
 Wie werden Treiber unter Linux (Android) verwaltet?
 \section{Dateisystem}
+\label{sec:Dateisystem}
 \subsection{Komponentenbasierter Speicher}
 Wie sind Dateisysteme und das Dateimanagement realisiert?
 \subsection{Cloudunterstützung}
