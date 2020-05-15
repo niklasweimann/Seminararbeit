@@ -5,6 +5,7 @@
 \usepackage[final]{graphicx}    % Grafiken einbinden
 \usepackage{url}
 
+
 \usepackage[pdftex,
     pdftitle={Hier soll der Titel hin},
     pdfauthor={Niklas Weimann}]{hyperref}
@@ -60,21 +61,29 @@ Cgroups (Control groups) sind ein von Linux bereitgestelltes System, um Prozesse
 \section{Komponenten v2}
 Komponenten spielen bei Fuchsia eine wichtige Rolle, da nahe zu alle Programme in Fuchsia als Komponente angesehen werden.
 \subsection{Komponenten Einführung}
-\begin{quote}
-Komponente ist ein hermetisches zusammensetzbares isoliertes Programm
-\end{quote} \cite{FuCHSIADOCS}, so wird der Begriff "Komponente" in der Fuchsia Dokumentation definiert. Komponenten können in jeder beliebigen Sprache implementiert werden, für die es einen Component-Runner gibt. Ein Component-Runner ist dabei für jede Programmiersprache nötig, die für die Implementierung einer Komponente verwendet wurden. Dieser hat Kenntnis darüber, wie eine Komponente ausgeführt werden kann, während der Komponenten-Manager weiß, was ausgeführt werden soll.
+\label{sec:Components}
+"Eine Komponente ist ein hermetisches zusammensetzbares isoliertes Programm" \cite{FuCHSIADOCS}, so wird der Begriff "Komponente" in der Fuchsia Dokumentation definiert. Komponenten können in jeder beliebigen Sprache implementiert werden, für die es einen Component-Runner gibt. Ein Component-Runner ist dabei für jede Programmiersprache nötig, die für die Implementierung einer Komponente verwendet wurden. Dieser hat Kenntnis darüber, wie eine Komponente ausgeführt werden kann, während der Komponenten-Manager weiß, was ausgeführt werden soll.
 
 Jede Komponente läuft während ihrer Ausführungszeit in einer Sandbox, sie ist also komplett von anderen Komponenten isoliert, dies ermöglicht es, dass jede Komponente einen eigenen Lebenszyklus, Zustand und Funktionen hat, somit ist auch sichergestellt, dass diese Komponente keine ungewollten Auswirkungen auf andere Komponenten haben kann. Stürzt beispielsweise eine Instanz einer  Komponente ab, so kann sie einfach durch eine neue Instanz der selben Komponente ersetzt werden, dies erhöht signifikant die Stabilität des Systems.
 
 Einzelne Komponenten werden durch ein Komponenten Manifest definiert, dieses enthält alle wichtigen Informationen, die der Komponenten-Manager oder der jeweilige Komponenten-Runner brauchen, um die Komponente erfolgreich ausführen zu können. \cite{https://fuchsia.googlesource.com/fuchsia/+/master/sdk/fidl/fuchsia.sys2/decls/component_decl.fidl} 
 Die Eigenschaften im Komponenten Manifest umfassen unter anderem die Programm Eigenschaft,  die Informationen für den Komponenten-Runner bereitstellt, damit dieser die Komponente erfolgreich starten zu können. Außerdem wird im Komponenten Manifest festgelegt, welchen Speicher (mehr dazu in Kapitel \ref{sec:Dateisystem}),  welche Capabilities die Komponente benötigt, anbietet und weiterleitet (mehr dazu in Kapitel \ref{sec:Capabilities}), sowie wie einige weitere Eigenschaften, auf die hier nicht genauer eingegangen werden soll.
 
-Um die Interoperabilität zwischen den Komponenten und verschiedenen Programmiersprachen zu ermöglichen, wurde für Fuchsia die Fuchsia Interface Definition Language Sprache entwickelt. Diese entkoppelt die Definition von IPC und der jeweiligen Implementierung der IPC Mechanismen. (mehr dazu in Kapitel \ref{sec:FIDL})
+Um die Interoperabilität zwischen den Komponenten und verschiedenen Programmiersprachen zu ermöglichen, wurde für Fuchsia die Fuchsia Interface Definition Language Sprache entwickelt (mehr dazu in Kapitel \ref{sec:FIDL}).
 
 \subsection{FIDL}
 \label{sec:FIDL}
-\subsection{Komponenten Manager}
+Die Fuchsia Interface Definition Language oder kurz FIDL entkoppelt die Definition von Inter Prozess Kommunikation (IPC) und der jeweiligen Implementierung der IPC Mechanismen. Dies kann an einem einfachen Echo Service leicht verdeutlicht werden. Mit FIDL ist es möglich, dass eine Komponente in C++ implementiert wird und mit einer Komponente kommuniziert die in Dart implementiert wurde. Zum Zeitpunkt der Erstellung dieser Seminararbeit werden C++, C, Rust, Go und Dart unterstützt. Für jede unterstütze Sprache muss ein ein entsprechender Übersetzer existieren, der die in der FIDL Datei definierten Strukturen in der entsprechenden Sprache erstellt. Die Fuchsia Dokumentation widmet diesem Thema einen ganzen Abschnitt, der für jede Sprache definiert, wie die Strukturen aus Fuchsia in die entsprechende Sprache übersetzt werden.\cite{https://fuchsia.dev/fuchsia-src/reference/fidl/bindings/overview}
 
+Eine Komponente implementiert meist das ServiceProvider Interface, dieser Service ermöglicht es, dass die Interface Definition alle Service innerhalb der Komponente, basierend auf dem Servicenamen, ausgegeben werden können. Ein Service ist dabei die Implementierung eines Service Interfaces, das wiederum einzelne Protokolle definieren kann. Zum Beispiel definiert der Netstack Service die Protokolle name\_lookup und socket\_provider (Siehe Beispiel unter \cite{https://fuchsia.dev/fuchsia-src/concepts/components/services?hl=en}).
+
+Eine Anwendung kann einen Service nutzen, indem sie über die von Zircon zur IPC zur Verfügung gestellten Channels eine Verbindung zu diesem Service herstellt. Über diese Verbindung kann können dann Nachrichten übermittelt werden. Dabei spielt das FIDL wire Format eine wichtige Rolle, dieses definiert, wie Objekte encodiert werden müssen, um sie so zu Versenden, dass der Service, der den Protokoll aufgerufen hat, die Nachricht wieder korrekt dekodieren kann.
+
+Jeder Aufruf einer durch den FIDL Übersetzer definierten Methode ist asynchron, deshalb haben alle Methoden, die durch einen FIDL Übersetzer erstellt werden keinen Rückgabe Typen. Die Rückgabe an einen aufrufenden Prozess läuft mittels Callback ab, der, neben den definierten Parametern, auch als Parameter mit in die Methode gegeben wird. Dieser Callback kann ein oder mehrere Parameter haben, dieses entsprechen den Rückgabe Werten, die im FIDL Interface definiert wurden (Genauere Informationen: \cite{https://fuchsia.googlesource.com/docs/+/ea2fce2874556205204d3ef70c60e25074dc7ffd/development/languages/fidl/tutorial.md}).
+
+Unter Android gibt es eine ähnliche Interface Sprache, um die Kommunikation zwischen Clients und Services zu definieren. Unter Android heißt diese Sprache Android Interface Definition Language kurz AIDL, sie definiert, ähnlich wie bei FIDL, ein Interface zur Inter Prozess Kommunikation. Im Gegensatz zu FIDL setzt AIDL jedoch eins zu eins auf die Java Syntax für seine Interfaces, während Fuchsia eine C++ ähnliche Syntax verwendet und dabei mehr Strukturen unterstützt, als AIDL. Somit ist in AIDL im Gegensatz zu FIDL die Anzahl der Rückgabewerte auf eins begrenzt.
+\subsection{Komponenten Manager}
+Der Komponenten Manager stellt in Fuchsia eine zentrale Rolle da, dieser verwaltet das Zusammenspiel zwischen den Komponenten(\ref{sec:Components}). Der Komponenten Manager ist einer der ersten Prozesse, die beim Booten des Systems gestartet werden, dies ist erforderlich, da der Komponenten Manager alle Komponenten Startet, die in Fuchsia verwendet werden. 
 Was sind die Aufgaben des Komponenten Manager?
 \subsection{Capabilities}
 \label{sec:Capabilities}
