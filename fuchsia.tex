@@ -83,8 +83,16 @@ Jeder Aufruf einer durch den FIDL Übersetzer definierten Methode ist asynchron,
 
 Unter Android gibt es eine ähnliche Interface Sprache, um die Kommunikation zwischen Clients und Services zu definieren. Unter Android heißt diese Sprache Android Interface Definition Language kurz AIDL, sie definiert, ähnlich wie bei FIDL, ein Interface zur Inter Prozess Kommunikation. Im Gegensatz zu FIDL setzt AIDL jedoch eins zu eins auf die Java Syntax für seine Interfaces, während Fuchsia eine C++ ähnliche Syntax verwendet und dabei mehr Strukturen unterstützt, als AIDL. Somit ist in AIDL im Gegensatz zu FIDL die Anzahl der Rückgabewerte auf eins begrenzt.
 \subsection{Komponenten Manager}
-Der Komponenten Manager stellt in Fuchsia eine zentrale Rolle da, dieser verwaltet das Zusammenspiel zwischen den Komponenten(\ref{sec:Components}). Der Komponenten Manager ist einer der ersten Prozesse, die beim Booten des Systems gestartet werden, dies ist erforderlich, da der Komponenten Manager alle Komponenten Startet, die in Fuchsia verwendet werden. 
-Was sind die Aufgaben des Komponenten Manager?
+Der Komponenten Manager stellt in Fuchsia eine zentrale Rolle da, dieser verwaltet das Zusammenspiel zwischen den Komponenten(\ref{sec:Components}). Der Komponenten Manager ist einer der ersten Prozesse, die beim Booten des Systems gestartet werden, dies ist erforderlich, da der Komponenten Manager alle Komponenten startet, die in Fuchsia verwendet werden.
+
+Der Komponenten Manager ist neben der Verwaltung von einzelnen Komponenten auch der Mittler zwischen Komponenten, er stellt zum Beispiel die Verbindung zwischen zwei Komponenten her. Wenn eine Komponente den Service einer anderen Komponente nutzen möchte, sendet die erste Komponente eine Anfrage nach der Ziel Komponente basierend auf der URL der Komponente an den Komponenten Manager, dieser wiederum kennt die zugehörige Komponente zu dieser URL und stellt die Verbindung entsprechend her. Beim Verbindungsaufbau kann es vorkommen, dass eine Komponente bereits gestoppt und somit persistiert wurde, wenn dies der Fall ist, sorgt der Komponenten Manager dafür, dass die Komponente wieder gestartet und der Zustand wieder hergestellt wird. Als Mittler validiert der Komponenten Manager jeden Aufruf zu einem Service basierend auf den Rechten, die im Komponenten Manifest festgelegt wurden.
+
+Aufgrund seiner zentralen Rolle in Fuchsia hat der Komponenten Manager eine privilegierte Rolle, da er viele Sicherheits- und Stabilitätsrelevante Entscheidungen treffen muss. Unterstützt wird der Komponenten Manager dabei durch die bereits oben erwähnten Runner, welche das Wissen über die Ausführung einer Komponente kapseln.
+
+Neben diesen Aufgaben kümmert sich der Komponenten Manager auch drum, dass die Komponenten in einer validen Topologie organisiert sind. Dazu verwaltet der Manager eine Baumstruktur für die Abhängigkeit der Komponenten, die in einer Eltern-Kind-Beziehung zueinander stehen können. Außerdem wird ein Routing Graph für die Capabilities der Komponenten verwaltet, dieser stellt da, wie einzelne Instanzen von Komponenten Zugriff auf die Dienste von anderen Komponenten erhalten, dabei ist jedoch zu beachten, dass immer nur Eltern Komponenten Zugriff auf die Dienste ihrer Kinder bekommen und nicht umgekehrt.
+
+Der Komponenten Manager kümmert sich außerdem um den Lebenszyklus von Komponenten. Dabei ist wichtig zu wissen, dass eine Komponenten Instanz sich in vier verschiedenen Zuständen befinden kann (Create, Start, Stop, Destroy).
+
 \subsection{Capabilities}
 \label{sec:Capabilities}
 Was sind Capabilities (Service, Protocol, Directory, Storage)?
