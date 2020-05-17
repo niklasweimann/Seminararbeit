@@ -103,12 +103,14 @@ Capabilities, die eine Komponente zur Verfügung stellt können von anderen Komp
 Service Capabilities erlauben es der Komponente A auf den FIDL Service von Komponente B zu zugreifen, während Protocol Capabilities nur den Zugriff auf ein einzelnes FIDL Protokoll erlauben. Der Unterschied wurde bereits in Kapitel \ref{sec:FIDL} erklärt.
 
 Directory Capabilites erlauben es einer Komponente A auf einen Ordner der Komponente B zu zugreifen, wobei im Komponentenmanifest für jeden Ordner der Komponente festgelegt werden kann, dass sie diesen freigibt und ob sie diesen Ordner nur lesend oder auch schreibend zugreift. Storage Capabilities bieten für die Komponente, die auf den Storage zugreifen, einen isolierten Speicher, dazu benötigt sie eine Referenz auf eine Directory Capability, damit der Komponentenmanager für jede zugreifend Komponente einen neuen Ordner innerhalb des freigegebenen Ordners erstellen kann. Die Komponente, die den Ordner freigibt, kann dann auf die Daten jeder Komponente zugreifen, die den Storage genutzt hat, um Daten zu speichern, während die Komponente, die gespeichert hat, nur auf die Daten zugreifen kann, die sie selbst gespeichert hat. Dies ist der Unterschied zwischen Directory Capabilities und Storage Capabilities.
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{figure/Capability_Routing}
+	\caption[Kurzform vom Bild]{Graphische Darstellung des Capability Routing der Komponenten ka, kb und kc mit einem Ausschnitt aus den jeweiligen Komponentenmanifesten.}
+	\label{abb:capabilityRouting}
+\end{figure}
+Capabilities können zugänglich gemacht, weitergeleitet und benutzt werden. Welche Komponente was mit welcher Capability macht, wird im Komponentenmanifest der Komponente angegeben. Wenn eine Komponente die Capabilities einer anderen Komponente nutzen möchte, kann sie dies mittels des use Schlüsselwortes im Komponentenmanifests angeben. Hier muss die Komponente den Typ der Capability sowie den Pfad zur Capability angeben, unter dem die Capability freigegeben wurde. Optional kann der Pfad im Komponentenmanifest mittels dem Schlüsselwort as auf einen anderen Pfad geleitet werden. Komponenten können mittels dem Schlüsselwort expose eine Capability an ihre Eltern weiter leiten und mittels offer an ihre Kinder Komponenten. Das Routing der Capabilites wird in Abbildung \ref{abb:capabilityRouting} genauer veranschaulicht. In diesem Beispiel gibt die Komponente kc ein FIDL-Protokoll unter dem Pfad /data/themes frei, während die Komponente ka dieses Protokoll an kb weiterleitet, indem sie es mittels offer ihrer Kind Komponente zur Verfügung stellt, dabei ändert sie den Pfad mittels as auf /themes. 
 
-Benutzen von Capabilities 
-
-EXPSOE vs. Offer => Was ist Capability Routing und wie funktioniert es?
-
-Was sind Capabilities (Service, Protocol, Directory, Storage)?
 \subsection{Vergleich zu Komponenten}
 Welche Vorteile bietet es, dass alles eine Komponente ist im Gegensatz zu Linux (Android)?
 \section{Treiber}
