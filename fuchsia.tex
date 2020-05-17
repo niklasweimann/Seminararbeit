@@ -91,12 +91,24 @@ Aufgrund seiner zentralen Rolle in Fuchsia hat der Komponenten Manager eine priv
 
 Neben diesen Aufgaben kümmert sich der Komponenten Manager auch drum, dass die Komponenten in einer validen Topologie organisiert sind. Dazu verwaltet der Manager eine Baumstruktur für die Abhängigkeit der Komponenten, die in einer Eltern-Kind-Beziehung zueinander stehen können. Außerdem wird ein Routing Graph für die Capabilities der Komponenten verwaltet, dieser stellt da, wie einzelne Instanzen von Komponenten Zugriff auf die Dienste von anderen Komponenten erhalten, dabei ist jedoch zu beachten, dass immer nur Eltern Komponenten Zugriff auf die Dienste ihrer Kinder bekommen und nicht umgekehrt.
 
-Der Komponenten Manager kümmert sich außerdem um den Lebenszyklus von Komponenten. Dabei ist wichtig zu wissen, dass eine Komponenten Instanz sich in vier verschiedenen Zuständen befinden kann (Create, Start, Stop, Destroy).
+Der Komponenten Manager kümmert sich außerdem um den Lebenszyklus von Komponenten. Dabei ist wichtig zu wissen, dass eine Komponenten Instanz sich in einem von vier verschiedenen Zuständen befinden kann (Create, Start, Stop, Destroy).
+
+Von einer Komponente kann eine neue Instanz erstellt werden, diese befindet sich initial im Zustand Create. In diesem Zustand wird der Instanz dann eine eindeutige ID zugewiesen, damit die Instanz immer wieder identifiziert werden kann. Anschließend wird die Instanz an die entsprechende Stelle im Komponentenbaum eingepflegt, somit kann auch der Routing Graph für die Capabilities angepasst werden. Im Zustand Start befindet sich die Instanz so lange, wie sie benötigt und ausgeführt wird, danach wechselt sie in den Zustand Stop, wenn die Instanz in den Zustand Stop wechselt, wird der aktuelle Zustand der Instanz persistiert, damit für die Komponente die Illusion ermöglicht wird, dass sie dauerhaft ausgeführt wird. Dies ermöglicht es auch, dass Komponenten beim wechseln auf ein anderes Gerät an der selben stelle fortgesetzt werden kann. Eine Komponente wechselt in den Zustand Destroy, wenn sie endgültig gelöscht wird, dabei werden alle Daten, die die Instanz betreffen, also auch der persistente Zustand gelöscht, damit existiert die Instanz der Komponente nicht mehr und es muss eine neue Komponenten Instanz erstellt werden.
 
 \subsection{Capabilities}
 \label{sec:Capabilities}
+Capabilities, die eine Komponente zur Verfügung stellt können von anderen Komponenten benutzt werden, allerdings ist der Zugriff auf die Capabilities durch die im Komponentenmanifest festgelegten Rechte limitiert, die über den Komponentenmanager überwacht werden. Dazu gibt es im Komponentenmanifest verschiedene Keywords. Es gibt vier verschiedene Arten, die im Komponentenmanifest festgelegt werden können. Zu diesen Capabilities gehören Service, Protocol, Directory und Storage, wobei Service und Protocol, sowie Directory und Storage sehr ähnlich sind und sich nur marginal unterscheiden.
+
+
+Service Capabilities erlauben es der Komponente A auf den FIDL Service von Komponente B zu zugreifen, während Protocol Capabilities nur den Zugriff auf ein einzelnes FIDL Protokoll erlauben. Der Unterschied wurde bereits in Kapitel \ref{sec:FIDL} erklärt.
+
+Directory Capabilites erlauben es einer Komponente A auf einen Ordner der Komponente B zu zugreifen, wobei im Komponentenmanifest für jeden Ordner der Komponente festgelegt werden kann, dass sie diesen freigibt und ob sie diesen Ordner nur lesend oder auch schreibend zugreift. Storage Capabilities bieten für die Komponente, die auf den Storage zugreifen, einen isolierten Speicher, dazu benötigt sie eine Referenz auf eine Directory Capability, damit der Komponentenmanager für jede zugreifend Komponente einen neuen Ordner innerhalb des freigegebenen Ordners erstellen kann. Die Komponente, die den Ordner freigibt, kann dann auf die Daten jeder Komponente zugreifen, die den Storage genutzt hat, um Daten zu speichern, während die Komponente, die gespeichert hat, nur auf die Daten zugreifen kann, die sie selbst gespeichert hat. Dies ist der Unterschied zwischen Directory Capabilities und Storage Capabilities.
+
+Benutzen von Capabilities 
+
+EXPSOE vs. Offer => Was ist Capability Routing und wie funktioniert es?
+
 Was sind Capabilities (Service, Protocol, Directory, Storage)?
-Was ist Capability Routing und wie funktioniert es?
 \subsection{Vergleich zu Komponenten}
 Welche Vorteile bietet es, dass alles eine Komponente ist im Gegensatz zu Linux (Android)?
 \section{Treiber}
