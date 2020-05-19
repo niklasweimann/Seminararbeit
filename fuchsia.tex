@@ -124,7 +124,11 @@ Wie werden Treiber unter Linux (Android) verwaltet?
 \subsection{Komponentenbasierter Speicher}
 Wie sind Dateisysteme und das Dateimanagement realisiert?
 \subsection{Cloudunterstützung}
-Was ist Ledger?
+Ledger ist ein auf Schlüsselwertpaaren basierender verteilter Speicher. Der Ledger erlaubt es basierend auf diesen Schlüsselwertpaaren Daten über einen Cloudspeicher mit anderen Geräten zu synchronisieren. Ein Eintrag besteht aus einem 16 Byte Schlüssel und einem beliebig großen byte Wert, der zum Zeitpunkt dieser Arbeit nur durch die Nachrichtengröße für FIDL Nachrichten limitiert ist.
+
+Der Ledger selbst besteht aus drei Ebenen. Auf der ersten Ebene befindet sich der Lokale Client, dieser stellt eine FIDL Api für Komponenten zur Verfügung über die Änderungen, Löschungen und Abfragen von einzelnen oder mehreren Einträgen möglich sind. Wenn es durch die Ändernungen, die eine Komponente über die API angefragt hat zu einem Konflikt kommt, versucht der Client diesen Konflikt zu lösen, indem er die Strategie verwendet, die vorher von der Komponente angegeben wurde, wenn diese nicht möglich ist, wird die Anfrage zurück an die Komponente geleitet. Wenn die Anfrage nicht zu einem Konflikt führt, werden die Änderungen auf die zweite Ebene weitergegben. Auf der zweiten Ebene werden die Daten im Storage mittels eines atomaren Commits persistiert. Der Commit-Verlauf jeder Seite kann, ähnlich wie bei GIT, als DAG dargestellt werden. Der Storage speichert für jeden Commit zusätzlich die Meta Daten für die Einträge und sortiert sie in einen B-Baum ein. Wenn der Commit persistiert wurde, benachrichtigt der Storage die dritte und letzte Ebene, den Cloud Sync, dieser lädt den neuen Commit in die Cloud und sellt die Daten damit für die anderen Geräte zur Verfügung. Außerdem achtet der Cloud Sync auf Änderungen im Cloud Speicher und lädt die neuen Einträge herunter und pflegt sie in den Speicher ein, damit die Lokale kopie und der Cloud Speicher möglichst immer die selben Daten enthalten. 
+
+Der Ledger unterstützt zwei verschiedene Betriebsmodi zum einen den Guest Mode und zum anderne den Regular mode. Im Guest mode hat der Ledger keine aktive Verbindung zur Cloud und speichert die Daten lediglich lokal. Im Regular Mode hat der Ledger eine aktive Verbindung zur CLoud und synchronisiert alle Geräte, die mit dem selben Benutzerkonto verbunden sind.
 \subsection{Vergleich Filesystems}
 Wie unterscheidet sich das Dateisystem von Linux (Andorid)?
 \section{Zusammenfassung}
