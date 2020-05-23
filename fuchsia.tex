@@ -115,10 +115,19 @@ Capabilities können zugänglich gemacht, weitergeleitet und benutzt werden. Wel
 Welche Vorteile bietet es, dass alles eine Komponente ist im Gegensatz zu Linux (Android)?
 \section{Treiber}
 \subsection{Verwaltung und Zugriff}
-Wie werden Treiber geladen?
-Wie wird er Zugriff auf die Geräte ermöglicht?
+Treiber in Fuchsia beziehungsweise Zircon werden hierarchisch organisiert und möglichst kleinteilig pro Gerät gesplittet, somit wird eine unnötige Duplizierung von Programmcode verhindert.
+
+Das Treiber-Framework in Fuchsia enthält unter anderem einen Gerätekoordinator, dieser  verwaltet eine Baumstruktur, die den Aufbau der Abhängigkeiten zwischen den einzelnen Treibern darstellt. So kann beispielsweise ein USB-Treiber als Elternknoten an einem PCI-Gerät hängen und selbst wieder einen Soundkarten Treiber als Kind haben, da an diesem PCI-Slot eine USB-Soundkarte hängt. Der Gerätemanager durchsucht /boot/driver und /system/driver nach Treibern, jeder dieser Treiber ist als Dynamic Shared Object (DSO) Implementierung. Damit der Geräte Koordinator bestimmen kann, welcher Treiber für welches Gerät verwendet werden kann, muss jeder Treiber eine Binding-Routine implementieren, die bestimmt, für welche Geräte dieser Treiber eingesetzt werden kann. Meist wird dazu die Vendor ID (VID) und Device ID (DID) verwendet, da diese in Kombination einzigartig für ein Gerät sind. 
+
+Der Treiberbaum hat initial einen Root-PCI-Driver als Wurzel, dieser geht davon aus, dass sich in dem System ein PCI fähiges Gerät befindet, wenn es gefunden wird, dann wird es an diesen Treiber gebunden. Für alle Geräte, die wiederum physisch mit dem PCI Gerät verbunden sind, schaut der Gerätekoordinator in definierten Verzeichnissen nach, ob dort ein Treiber gefunden werden kann, dessen Binding Funktion für diese VID und DID ein positivies Ergebnis liefert. Jeder Pfad von der Wurzel des Baumes bis zu jedem Blatt wird vom Gerätekoordinator als Gerät betrachtet.
+
+Basierend auf einer Systemrichtlinie splittet der Gerätekoordinator den Baum in einzelne Teilbäume, die jeweils innerhalb eines Geräte-Host-Prozesses (devhost) ausgeführt werden, durch die Teilung der Gerätetreiber in einzelne Gruppen soll eine höhere Stabilität und Sicherheit erzielt werden können.
+
+Treiber können Metakommunikation für das Gerät bzw. den Treiber mittels eines FIDL-Protokols definieren. Das Lesen bzw. Schreiben von Daten an ein Gerät ist wie ein Lesezugriff bzw. Schreibzugriff auf eine Datei realisiert. Das Gerät ist dabei unter /dev/gemounted.
 \subsection{Vergleich Treiber}
-Wie werden Treiber unter Linux (Android) verwaltet?
+Der Linux Kernel besitzt kein System, dass Treiber in einzelne Prozesse trennt. Der monolithische Kernel von Linux lässt alle Treiber innerhalb des selben Prozesses laufen, dies hat zur Folge, dass ein Fehler in einem Treiber zu einem System Absturz führen oder eine Sicherheitslücke zu root Zugriff führen kann. Linux unterteilt Treiber in drei Kategorien: byteorientierte Geräte (z.B. Tastaturen), blockorientierte Geräte (z.B. Festplatten) und paketorientierte Geräte. Byteorientierte Geräte können nur jeweils ein Zeichen auf einmal ausgeben oder einlesen und sind als Dateien in das Dateisystem von Linux eingebunden. Während blockorientierte Geräte nur vielfache der spezifizierten Blockmenge lesen bzw. schreiben können, sind sie sowohl über einen Pfad im Dateisystem von Linux erreichbar, als auch über eine spezifische Datei im Dateisystem. 
+
+Byteorientierte und blockorientierte Treiber werden unter Linux im chrdev bzw. blkdev Vektor gespeichert, sobald ein Gerät erkannt wird, wird der entsprechende Treiber in den Vektor eingefügt und ab dann werden die Major und Minor Nummer zur Identifizierung des Gerätes verwendet, wobei die Major Nummer den Type des Gerätes angibt (z.B. tty) und die Minor Nummer die einzelne Instanz des Gerätes identifiziert. Der Zugriff auf die Geräte erfolgt dann über eine Datei im Pfad /dev und mittels den regulären Systemcalls für Dateien können Daten von dem Gerät gelesen und an das Gerät gesendet werden. 
 \section{Dateisystem}
 \label{sec:Dateisystem}
 \subsection{Komponentenbasierter Speicher}
