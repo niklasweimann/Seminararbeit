@@ -135,7 +135,11 @@ Außerdem sind Treiber unter Fuchsia im Userspace in einzelne Prozesse gekapselt
 
 \section{Dateisystem}
 \label{sec:Dateisystem}
-\subsection{Komponentenbasierter Speicher}
+\subsection{Dateisystem Architektur und Dateisystem}
+Zircon hat kein eigenes Datei, sondern setzt darauf, dass ein Dateisystem im Benutzerbereich als Prozess zur Verfügung gestellt wird. Dadurch wird es theoretisch möglich, dass das Dateisystem während des laufenden Betriebes ausgetauscht und geupdatet werden kann. Diese Architektur setzt jedoch voraus, dass die Interaktion mit dem Dateisystem auf ein Interface beschränkt ist, dieses wird in Fuchsia mittels FIDL \cite{vglFIDLio} realisiert. Das Kommunikationsmodell für die Interaktion mit dem Dateisystem findet, da es sich immer um eine Kommunikation zwischen zwei Benutzerprozessen handelt, über Channels statt, wodurch ein Server/Client System entsteht. Der Prozess, der das Dateisystem zur Verfügung stellt, entspricht dabei einem Server und die Prozesse, die über die Channels, auf diesen Serverprozess zugreifen, um das Dateisystem zu nutzen, entsprechen in diesem Modell den Clients.
+
+Dateisysteme haben typischerweise 2 Handels, eines, um mit dem Dateisystem selbst zu kommunizieren, und ein optionales, um mit dem Gerät zu kommunizieren, auf dem das Dateisystem gespeichert wird.
+
 Wie sind Dateisysteme und das Dateimanagement realisiert?
 \subsection{Cloudunterstützung}
 Ledger ist ein auf Schlüsselwertpaaren basierender verteilter Speicher. Der Ledger erlaubt es basierend auf diesen Schlüsselwertpaaren Daten über einen Cloudspeicher mit anderen Geräten zu synchronisieren. Ein Eintrag besteht aus einem 16 Byte Schlüssel und einem beliebig großen byte Wert, der zum Zeitpunkt dieser Arbeit nur durch die Nachrichtengröße für FIDL Nachrichten limitiert ist.
