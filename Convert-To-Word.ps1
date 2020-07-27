@@ -1,0 +1,1 @@
+pandoc -f latex -t docx fuchsia.tex -o fuchsia.docx
