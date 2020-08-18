@@ -28,9 +28,11 @@ jobs:
       with:
         root_file: fuchsia.tex
     # Publishes the pdf file as a new release
-    - name: Upload the artifacts
-      uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload pdf to release
+      uses: svenstaro/upload-release-action@v2
       with:
-        args: '*.pdf'
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: fuchsia.pdf
+        asset_name: Fuchsia.pdf
+        tag: ${{ github.ref }}
+        overwrite: true
